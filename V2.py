@@ -112,8 +112,7 @@ class FontViewerApp:
 
     def add_font_to_folder(self, folder_name, font_name):
         if folder_name in self.custom_folders:
-            if font_name not in self.custom_folders[
-                folder_name]:  # Vérifier si la police n'est pas déjà dans le dossier
+            if font_name not in self.custom_folders[folder_name]:  # Vérifier si la police n'est pas déjà dans le dossier
                 self.custom_folders[folder_name].append(font_name)
                 self.update_font_listbox()
             else:
@@ -204,7 +203,10 @@ class FontViewerApp:
         preview_frame_inner = tk.Frame(preview_canvas, bg="#F2F2F2")
         preview_canvas.create_window((0, 0), window=preview_frame_inner, anchor=tk.NW)
 
-        for font_name in fonts_in_folder:
+        # Tri des polices par ordre alphabétique
+        fonts_in_folder_sorted = sorted(fonts_in_folder)
+
+        for font_name in fonts_in_folder_sorted:
             label = tk.Label(preview_frame_inner, text=font_name, font=(font_name, 20))
             label.pack(anchor="w")
 
@@ -212,7 +214,7 @@ class FontViewerApp:
         preview_canvas.config(scrollregion=preview_canvas.bbox("all"))
 
         def on_mouse_wheel(event):
-            preview_canvas.yview_scroll(-1*(event.delta//120), "units")
+            preview_canvas.yview_scroll(-1 * (event.delta // 120), "units")
 
         preview_canvas.bind_all("<MouseWheel>", on_mouse_wheel)
 
@@ -252,12 +254,15 @@ class FontViewerApp:
 
     def show_fonts_in_folder(self, event):
         selected_font_or_folder = self.font_listbox.get(self.font_listbox.nearest(event.y))
-        if selected_font_or_folder in self.custom_folders:
-            fonts_in_folder = self.custom_folders[selected_font_or_folder]
-        elif selected_font_or_folder == "Favoris":  # Ajout de cette condition pour détecter le dossier "Favoris"
-            fonts_in_folder = self.favorite_fonts
+        if selected_font_or_folder in self.custom_folders or selected_font_or_folder == "Favoris":
+            fonts_in_folder = self.custom_folders[
+                selected_font_or_folder] if selected_font_or_folder in self.custom_folders else self.favorite_fonts
         else:
+            self.destroy_preview_frame()  # Détruire le frame de prévisualisation
             return  # Si aucun dossier n'est sélectionné, ne rien faire
+
+        # Tri des polices par ordre alphabétique
+        fonts_in_folder_sorted = sorted(fonts_in_folder)
 
         self.preview_frame.destroy()
         self.preview_frame = tk.Frame(self.root, bg="#F2F2F2")
@@ -270,13 +275,17 @@ class FontViewerApp:
         preview_frame_inner = tk.Frame(preview_canvas, bg="#F2F2F2")
         preview_canvas.create_window((0, 0), window=preview_frame_inner, anchor=tk.NW)
 
-        for font_name in fonts_in_folder:
+        for font_name in fonts_in_folder_sorted:
             label = tk.Label(preview_frame_inner, text=font_name, font=(font_name, 20))
             label.pack(anchor="w")
         preview_frame_inner.update_idletasks()
         preview_canvas.config(scrollregion=preview_canvas.bbox("all"))
         preview_canvas.bind("<MouseWheel>",
                             lambda event: preview_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units"))
+
+    def destroy_preview_frame(self):
+        if hasattr(self, "preview_frame"):
+            self.preview_frame.destroy()
 
 if __name__ == "__main__":
     root = tk.Tk()
