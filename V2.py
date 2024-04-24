@@ -56,11 +56,14 @@ class FontViewerApp:
         text_button_frame = tk.Frame(self.root, bg="#F2F2F2")
         text_button_frame.pack(side=tk.TOP, pady=10)
 
-        self.add_favorite_button = ttk.Button(text_button_frame, text="Ajouter aux favoris", command=self.add_to_favorites, style='Black.TButton')
-        self.add_favorite_button.pack(side=tk.LEFT, padx=15)
-
         self.add_folder_button = ttk.Button(text_button_frame, text="Ajouter un dossier", command=self.add_custom_folder, style='Black.TButton')
         self.add_folder_button.pack(side=tk.LEFT, padx=15)
+
+        # Curseur pour la taille de la police
+        self.font_size_scale = tk.Scale(text_button_frame, from_=10, to=40, orient=tk.HORIZONTAL, length=200,
+                                         label='    ', command=self.update_font_size)
+        self.font_size_scale.set(30)  # Définit la valeur par défaut à 30
+        self.font_size_scale.pack(side=tk.LEFT, padx=10)
 
         # Frame pour contenir la fenêtre de prévisualisation
         self.preview_frame = tk.Frame(self.root, bg="#F2F2F2")
@@ -86,7 +89,7 @@ class FontViewerApp:
     def update_text_in_real_time(self, event):
         text = self.text_entry.get()
         selected_font = self.font_listbox.get(self.font_listbox.curselection()[0]) if self.font_listbox.curselection() else 'Arial'
-        self.text_label.config(text=text, font=(selected_font, 30))
+        self.text_label.config(text=text, font=(selected_font, self.font_size_scale.get()))
 
     def search_fonts(self, event=None):
         query = self.search_font_entry.get().lower()
@@ -99,7 +102,7 @@ class FontViewerApp:
         if self.font_listbox.curselection():
             selected_font = self.font_listbox.get(self.font_listbox.curselection()[0])
             text = self.text_entry.get() if self.text_entry.get() else self.default_text
-            self.text_label.config(text=text, font=(selected_font, 30), wraplength=self.root.winfo_screenwidth() * 2 / 3)
+            self.text_label.config(text=text, font=(selected_font, self.font_size_scale.get()), wraplength=self.root.winfo_screenwidth() * 2 / 3)
 
     def add_to_favorites(self):
         selected_font = self.font_listbox.get(self.font_listbox.curselection()[0])
@@ -151,11 +154,11 @@ class FontViewerApp:
         for f in sorted(set(self.fonts) - set(self.favorite_fonts)):
             self.font_listbox.insert(tk.END, f)
 
-    def update_text(self, event=None):
+    def update_font_size(self, size):
         if self.font_listbox.curselection():
-            text = self.text_entry.get() if self.text_entry.get() else self.default_text
             selected_font = self.font_listbox.get(self.font_listbox.curselection()[0])
-            self.text_label.config(text=text, font=(selected_font, 30))
+            text = self.text_entry.get() if self.text_entry.get() else self.default_text
+            self.text_label.config(text=text, font=(selected_font, int(size)))
 
     def show_context_menu(self, event):
         selected_font_or_folder = self.font_listbox.get(self.font_listbox.nearest(event.y))
