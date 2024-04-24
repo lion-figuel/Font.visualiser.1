@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 import tkinter.simpledialog
 from tkinter import font
+import json
 
 class FontViewerApp:
     def __init__(self, root):
@@ -74,6 +75,8 @@ class FontViewerApp:
         self.search_font_entry = tk.Entry(self.font_listbox, bg='#F2F2F2', fg='#2f2f2f', font=('Arial', 10))
         self.search_font_entry.pack(side=tk.BOTTOM, pady=5, padx=10, ipadx=100)
         self.search_font_entry.bind("<KeyRelease>", self.search_fonts)
+
+        self.load_data()  # Charger les données sauvegardées à partir du fichier JSON
 
     def limit_characters(self, event):
         if len(self.text_entry.get()) > 50:
@@ -287,7 +290,26 @@ class FontViewerApp:
         if hasattr(self, "preview_frame"):
             self.preview_frame.destroy()
 
+    def load_data(self):
+        try:
+            with open("font_viewer_data.json", "r") as file:
+                data = json.load(file)
+                self.favorite_fonts = data.get("favorite_fonts", [])
+                self.custom_folders = data.get("custom_folders", {})
+                self.update_font_listbox()
+        except FileNotFoundError:
+            pass  # Fichier non trouvé, aucune donnée à charger
+
+    def save_data(self):
+        with open("font_viewer_data.json", "w") as file:
+            data = {
+                "favorite_fonts": self.favorite_fonts,
+                "custom_folders": self.custom_folders
+            }
+            json.dump(data, file)
+
 if __name__ == "__main__":
     root = tk.Tk()
     app = FontViewerApp(root)
+    root.protocol("WM_DELETE_WINDOW", lambda: (app.save_data(), root.destroy()))  # Enregistrer les données lors de la fermeture de l'application
     root.mainloop()
