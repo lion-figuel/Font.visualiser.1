@@ -10,6 +10,7 @@ class FontViewerApp:
         self.root.title("Visualiseur de Polices")
         self.root.configure(bg="#F2F2F2")  # Couleur de fond pour toute l'application
         self.fonts = font.families()
+        print("Nombre total de polices récupérées :", len(self.fonts))
         self.favorite_fonts = []
         self.custom_folders = {}  # Dictionnaire pour stocker les dossiers personnalisés
 
