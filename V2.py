@@ -221,6 +221,13 @@ class FontViewerApp:
 
         preview_canvas.bind_all("<MouseWheel>", on_mouse_wheel)
 
+    def get_font_styles(self, font_name):
+        styles = []
+        for style in ['bold', 'italic', 'underline', 'overstrike']:
+            if font.Font(font=(font_name, 10), weight=style).actual()['weight'] == style:
+                styles.append(style)
+        return styles
+
     def add_to_folder_from_menu(self, folder_name):
         selected_font = self.font_listbox.get(self.font_listbox.curselection()[0])
         self.add_font_to_folder(folder_name, selected_font)
