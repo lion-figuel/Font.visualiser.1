@@ -4,6 +4,7 @@ import tkinter.simpledialog
 from tkinter import font
 import json
 
+
 class FontViewerApp:
     def __init__(self, root):
         self.root = root
@@ -81,6 +82,54 @@ class FontViewerApp:
         self.search_font_entry.bind("<KeyRelease>", self.search_fonts)
 
         self.load_data()  # Charger les données sauvegardées à partir du fichier JSON
+
+        # Ajout des carrés noir et blanc en haut à droite
+        self.black_square = tk.Canvas(self.root, width=30, height=30, bg="black", highlightthickness=0)
+        self.black_square.place(relx=1, rely=0, anchor="ne")
+        self.black_square.bind("<Button-1>", self.change_theme)
+
+    def change_theme(self, event):
+        current_bg_color = self.root.cget("bg")
+
+        # Si le carré noir est cliqué et le thème est par défaut, passe au thème noir
+        if current_bg_color == "#F2F2F2":
+            new_bg_color = "#0A0A0A"
+            new_fg_color = "#d5d5d5"
+        # Si le carré blanc est cliqué et le thème est noir, repasse au thème par défaut
+        else:
+            new_bg_color = "#F2F2F2"
+            new_fg_color = "#2f2f2f"
+
+        self.root.config(bg=new_bg_color)
+
+        self.text_label.config(bg=new_bg_color, fg=new_fg_color)
+        self.text_entry.config(bg=new_bg_color, fg=new_fg_color)
+
+        self.font_listbox.config(bg='#d0d0d0' if new_bg_color == "#F2F2F2" else '#212121', fg=new_fg_color)
+        self.scrollbar.config(bg=new_bg_color)
+        self.search_font_entry.config(bg=new_bg_color, fg=new_fg_color)
+
+        # Changement de couleur pour la zone entourant le bouton et le curseur
+        text_button_frame = self.root.nametowidget('!frame')
+        text_button_frame.config(bg=new_bg_color)
+
+        # Changement de couleur pour la zone en dessous des boutons
+        preview_frame_inner = self.preview_frame.nametowidget('!frame')
+        preview_frame_inner.config(bg=new_bg_color)
+
+        # Mettez à jour les couleurs des carrés noirs et blancs
+        self.black_square.config(bg="#000000" if current_bg_color == "#F2F2F2" else "#F2F2F2")
+        self.white_square.config(bg="#FFFFFF" if current_bg_color == "#F2F2F2" else "#000000")
+
+    def reset_theme(self, event):
+        self.root.config(bg="#F2F2F2", fg="#2f2f2f")
+        self.text_label.config(bg="#F2F2F2", fg="#2f2f2f")
+        self.text_entry.config(bg='#d0d0d0', fg='#2f2f2f')
+        self.font_listbox.config(bg='#d0d0d0', fg='#2f2f2f')
+        self.scrollbar.config(bg="#F2F2F2")
+        self.search_font_entry.config(bg="#F2F2F2", fg="#2f2f2f")
+        self.black_square.config(bg="black")
+        self.white_square.config(bg="white")
 
     def limit_characters(self, event):
         if len(self.text_entry.get()) > 50:
