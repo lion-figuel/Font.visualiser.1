@@ -4,25 +4,21 @@ import tkinter.simpledialog
 from tkinter import font
 import json
 
-
 class FontViewerApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Visualiseur de Polices")
-        self.root.configure(bg="#F2F2F2")  # Couleur de fond pour toute l'application
+        self.root.configure(bg="#F2F2F2")
         self.fonts = font.families()
         print("Nombre total de polices récupérées :", len(self.fonts))
         self.favorite_fonts = []
-        self.custom_folders = {}  # Dictionnaire pour stocker les dossiers personnalisés
+        self.custom_folders = {}
 
         self.style = ttk.Style()
-        self.style.theme_use('default')  # Utilisation du thème 'default'
-
-        # Personnalisation des styles pour les boutons
+        self.style.theme_use('default')
         self.style.configure('Black.TButton', foreground='#2f2f2f', background='#d7d7d7')
         self.style.map('Black.TButton', foreground=[('active', 'black')])
 
-        # Frame pour contenir la liste des polices et la barre de défilement
         font_list_frame = tk.Frame(self.root, bg="#F2F2F2")
         font_list_frame.pack(side=tk.LEFT, fill=tk.Y)
 
@@ -31,7 +27,6 @@ class FontViewerApp:
 
         self.scrollbar = tk.Scrollbar(font_list_frame, orient=tk.VERTICAL)
         self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-
         self.scrollbar.config(command=self.font_listbox.yview)
         self.font_listbox.config(yscrollcommand=self.scrollbar.set)
 
@@ -42,94 +37,69 @@ class FontViewerApp:
         for f in sorted(self.fonts):
             self.font_listbox.insert(tk.END, f)
 
-        # Zone de texte et autres éléments
         self.default_text = "Portez ce vieux whisky au juge blond qui fume"
-        self.text_label = tk.Label(self.root, text=self.default_text, font=("Arial", 30), bg="#F2F2F2", fg="#2f2f2f", wraplength=0)
+        self.text_label = tk.Label(self.root, text=self.default_text, font=("Arial", 30), bg="#F2F2F2", fg="#2f2f2f")
         self.text_label.pack(pady='250')
 
-        self.text_entry = tk.Entry(self.root, bg='#d0d0d0', fg='#2f2f2f', font=('Arial', 12))
+        text_button_frame = tk.Frame(self.root, bg="#F2F2F2", name='text_button_frame')
+        text_button_frame.pack(side=tk.TOP, pady=10)
+
+        self.font_size_scale = tk.Scale(text_button_frame, from_=10, to=40, orient=tk.HORIZONTAL, length=200, label='    ', command=self.update_font_size, troughcolor="#F2F2F2", bg="#F2F2F2", highlightthickness=0)
+        self.font_size_scale.set(30)
+        self.font_size_scale.pack(side=tk.TOP, padx=10)
+
+        self.text_entry = tk.Entry(text_button_frame, bg='#d0d0d0', fg='#2f2f2f', font=('Arial', 12))
         self.text_entry.insert(0, self.default_text)
         self.text_entry.pack(pady=5, padx=10, ipadx=100)
         self.text_entry.bind("<Key>", self.limit_characters)
         self.text_entry.bind("<KeyRelease>", self.update_text_in_real_time)
 
-        # Frame pour contenir la zone de texte et les boutons
-        text_button_frame = tk.Frame(self.root, bg="#F2F2F2")
-        text_button_frame.pack(side=tk.TOP, pady=10)
-
         self.add_folder_button = ttk.Button(text_button_frame, text="Ajouter un dossier", command=self.add_custom_folder, style='Black.TButton')
-        self.add_folder_button.pack(side=tk.LEFT, padx=15)
+        self.add_folder_button.pack(side=tk.TOP, padx=15)
 
-        # Curseur pour la taille de la police
-        self.font_size_scale = tk.Scale(text_button_frame, from_=10, to=40, orient=tk.HORIZONTAL, length=200,
-                                         label='    ', command=self.update_font_size)
-        self.font_size_scale.set(30)  # Définit la valeur par défaut à 30
-        self.font_size_scale.pack(side=tk.LEFT, padx=10)
-
-        # Frame pour contenir la fenêtre de prévisualisation
         self.preview_frame = tk.Frame(self.root, bg="#F2F2F2")
         self.preview_frame.pack(side=tk.RIGHT, padx=10, pady=10, fill=tk.BOTH, expand=True)
-
-        # Calcul de la largeur de la fenêtre principale
         app_width = self.root.winfo_screenwidth() // 3
-
-        # Configuration de la taille de la fenêtre de prévisualisation
         self.preview_frame.config(width=app_width)
 
-        # Ajout de la fonction de recherche de police
         self.search_font_entry = tk.Entry(self.font_listbox, bg='#F2F2F2', fg='#2f2f2f', font=('Arial', 10))
         self.search_font_entry.pack(side=tk.BOTTOM, pady=5, padx=10, ipadx=100)
         self.search_font_entry.bind("<KeyRelease>", self.search_fonts)
 
-        self.load_data()  # Charger les données sauvegardées à partir du fichier JSON
+        self.load_data()
 
-        # Ajout des carrés noir et blanc en haut à droite
         self.black_square = tk.Canvas(self.root, width=30, height=30, bg="black", highlightthickness=0)
         self.black_square.place(relx=1, rely=0, anchor="ne")
         self.black_square.bind("<Button-1>", self.change_theme)
 
     def change_theme(self, event):
         current_bg_color = self.root.cget("bg")
-
-        # Si le carré noir est cliqué et le thème est par défaut, passe au thème noir
-        if current_bg_color == "#F2F2F2":
+        if current_bg_color == "#F2F2F2":  # Si le fond actuel est clair, passer au sombre
             new_bg_color = "#0A0A0A"
             new_fg_color = "#d5d5d5"
-        # Si le carré blanc est cliqué et le thème est noir, repasse au thème par défaut
-        else:
+            new_trough_color = "#333333"
+        else:  # Sinon, revenir au thème clair
             new_bg_color = "#F2F2F2"
             new_fg_color = "#2f2f2f"
+            new_trough_color = "#d0d0d0"
 
-        self.root.config(bg=new_bg_color)
+        # Appliquer les nouvelles couleurs à tous les widgets pertinents
+        self.apply_theme_to_widgets(self.root, new_bg_color, new_fg_color, new_trough_color)
 
-        self.text_label.config(bg=new_bg_color, fg=new_fg_color)
-        self.text_entry.config(bg=new_bg_color, fg=new_fg_color)
+    def apply_theme_to_widgets(self, widget, bg_color, fg_color, trough_color):
+        # Une fonction récursive pour appliquer les thèmes à tous les widgets enfants
+        try:
+            widget.config(bg=bg_color)
+            if hasattr(widget, 'config'):
+                # Changer les couleurs de fond et de premier plan si applicable
+                widget.config(bg=bg_color, fg=fg_color)
+                if 'troughcolor' in widget.keys():
+                    widget.config(troughcolor=trough_color)
+        except tk.TclError:
+            pass  # Ignorer les widgets qui ne supportent pas ces propriétés
 
-        self.font_listbox.config(bg='#d0d0d0' if new_bg_color == "#F2F2F2" else '#212121', fg=new_fg_color)
-        self.scrollbar.config(bg=new_bg_color)
-        self.search_font_entry.config(bg=new_bg_color, fg=new_fg_color)
-
-        # Changement de couleur pour la zone entourant le bouton et le curseur
-        text_button_frame = self.root.nametowidget('!frame')
-        text_button_frame.config(bg=new_bg_color)
-
-        # Changement de couleur pour la zone en dessous des boutons
-        preview_frame_inner = self.preview_frame.nametowidget('!frame')
-        preview_frame_inner.config(bg=new_bg_color)
-
-        # Mettez à jour les couleurs des carrés noirs et blancs
-        self.black_square.config(bg="#000000" if current_bg_color == "#F2F2F2" else "#F2F2F2")
-        self.white_square.config(bg="#FFFFFF" if current_bg_color == "#F2F2F2" else "#000000")
-
-    def reset_theme(self, event):
-        self.root.config(bg="#F2F2F2", fg="#2f2f2f")
-        self.text_label.config(bg="#F2F2F2", fg="#2f2f2f")
-        self.text_entry.config(bg='#d0d0d0', fg='#2f2f2f')
-        self.font_listbox.config(bg='#d0d0d0', fg='#2f2f2f')
-        self.scrollbar.config(bg="#F2F2F2")
-        self.search_font_entry.config(bg="#F2F2F2", fg="#2f2f2f")
-        self.black_square.config(bg="black")
-        self.white_square.config(bg="white")
+        for child in widget.winfo_children():
+            self.apply_theme_to_widgets(child, bg_color, fg_color, trough_color)
 
     def limit_characters(self, event):
         if len(self.text_entry.get()) > 50:
