@@ -78,20 +78,23 @@ class FontViewerApp:
             new_bg_color = "#0A0A0A"
             new_fg_color = "#d5d5d5"
             new_trough_color = "#333333"
+            button_bg_color = "#000000"
+            button_fg_color = "#FFFFFF"
         else:  # Sinon, revenir au thème clair
             new_bg_color = "#F2F2F2"
             new_fg_color = "#2f2f2f"
             new_trough_color = "#d0d0d0"
+            button_bg_color = "#d7d7d7"
+            button_fg_color = "#2f2f2f"
 
         # Appliquer les nouvelles couleurs à tous les widgets pertinents
         self.apply_theme_to_widgets(self.root, new_bg_color, new_fg_color, new_trough_color)
+        self.style.configure('Black.TButton', background=button_bg_color, foreground=button_fg_color)
 
     def apply_theme_to_widgets(self, widget, bg_color, fg_color, trough_color):
-        # Une fonction récursive pour appliquer les thèmes à tous les widgets enfants
         try:
             widget.config(bg=bg_color)
             if hasattr(widget, 'config'):
-                # Changer les couleurs de fond et de premier plan si applicable
                 widget.config(bg=bg_color, fg=fg_color)
                 if 'troughcolor' in widget.keys():
                     widget.config(troughcolor=trough_color)
