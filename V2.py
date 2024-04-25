@@ -1,8 +1,9 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, PhotoImage
 import tkinter.simpledialog
 from tkinter import font
 import json
+
 
 class FontViewerApp:
     def __init__(self, root):
@@ -72,20 +73,31 @@ class FontViewerApp:
         self.black_square.place(relx=1, rely=0, anchor="ne")
         self.black_square.bind("<Button-1>", self.change_theme)
 
+        # Charger les icônes pour les thèmes
+        self.icon_night = PhotoImage(file="Night.png")
+        self.icon_day = PhotoImage(file="Day.png")
+
+        # Initialiser l'icône par défaut
+        self.theme_icon = tk.Label(self.root, image=self.icon_night, bg="#F2F2F2")
+        self.theme_icon.place(relx=1, rely=0, anchor="ne")
+        self.theme_icon.bind("<Button-1>", self.change_theme)  # Lier le clic à la méthode change_theme
+
     def change_theme(self, event):
         current_bg_color = self.root.cget("bg")
-        if current_bg_color == "#F2F2F2":  # Si le fond actuel est clair, passer au sombre
+        if current_bg_color == "#F2F2F2":  # Thème clair à thème sombre
             new_bg_color = "#0A0A0A"
             new_fg_color = "#d5d5d5"
             new_trough_color = "#333333"
             button_bg_color = "#000000"
             button_fg_color = "#FFFFFF"
-        else:  # Sinon, revenir au thème clair
+            self.theme_icon.config(image=self.icon_day)  # Utiliser l'icône Day
+        else:  # Thème sombre à thème clair
             new_bg_color = "#F2F2F2"
             new_fg_color = "#2f2f2f"
             new_trough_color = "#d0d0d0"
             button_bg_color = "#d7d7d7"
             button_fg_color = "#2f2f2f"
+            self.theme_icon.config(image=self.icon_night)  # Revenir à l'icône Night
 
         # Appliquer les nouvelles couleurs à tous les widgets pertinents
         self.apply_theme_to_widgets(self.root, new_bg_color, new_fg_color, new_trough_color)
