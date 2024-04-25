@@ -220,23 +220,24 @@ class FontViewerApp:
     def preview_folder_contents(self, selected_folder, fonts_in_folder):
         preview_window = tk.Toplevel(self.root)
         preview_window.title("Prévisualisation de {}".format(selected_folder))
-        preview_window.configure(bg="#F2F2F2")
+        preview_window.configure(bg=self.root.cget('bg'))  # Utiliser la couleur de fond actuelle du root
 
-        preview_canvas = tk.Canvas(preview_window, bg="#F2F2F2", highlightthickness=0)
+        preview_canvas = tk.Canvas(preview_window, bg=self.root.cget('bg'), highlightthickness=0)
         preview_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
         scrollbar = tk.Scrollbar(preview_window, orient=tk.VERTICAL, command=preview_canvas.yview)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         preview_canvas.configure(yscrollcommand=scrollbar.set)
 
-        preview_frame_inner = tk.Frame(preview_canvas, bg="#F2F2F2")
+        preview_frame_inner = tk.Frame(preview_canvas, bg=self.root.cget('bg'))
         preview_canvas.create_window((0, 0), window=preview_frame_inner, anchor=tk.NW)
 
         # Tri des polices par ordre alphabétique
         fonts_in_folder_sorted = sorted(fonts_in_folder)
 
         for font_name in fonts_in_folder_sorted:
-            label = tk.Label(preview_frame_inner, text=font_name, font=(font_name, 20))
+            label = tk.Label(preview_frame_inner, text=font_name, font=(font_name, 20), bg=self.root.cget('bg'),
+                             fg=self.root.cget('fg'))
             label.pack(anchor="w")
 
         preview_frame_inner.update_idletasks()
