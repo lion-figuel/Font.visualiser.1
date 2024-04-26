@@ -202,7 +202,7 @@ class FontViewerApp:
             menu.add_command(label="Renommer le dossier", command=self.rename_folder)
             menu.add_command(label="Prévisualiser le dossier",
                              command=lambda: self.preview_folder_contents(selected_font_or_folder, self.custom_folders[
-                                 selected_font_or_folder]))  # Modifier ici
+                                 selected_font_or_folder]))  # Passer le nom du dossier et ses polices
             menu.post(event.x_root, event.y_root)
         elif selected_font_or_folder in self.favorite_fonts:
             if selected_font_or_folder != "Favoris":
@@ -224,6 +224,13 @@ class FontViewerApp:
                     menu.add_command(label="Supprimer la police du dossier", command=self.remove_from_folder_from_menu)
                 menu.post(event.x_root, event.y_root)
 
+    def get_text_color(self):
+        current_bg_color = self.root.cget("bg")
+        if current_bg_color == "#F2F2F2":  # Thème clair
+            return "#2f2f2f"  # Couleur de texte sombre
+        else:  # Thème sombre
+            return "#FFFFFF"  # Couleur de texte claire
+
     def preview_favorite_fonts(self):
         selected_folder = "Favoris"
         fonts_in_folder = self.favorite_fonts
@@ -232,7 +239,7 @@ class FontViewerApp:
     def preview_folder_contents(self, selected_folder, fonts_in_folder):
         preview_window = tk.Toplevel(self.root)
         preview_window.title("Prévisualisation de {}".format(selected_folder))
-        preview_window.configure(bg=self.root.cget('bg'))  # Utiliser la couleur de fond actuelle du root
+        preview_window.configure(bg=self.root.cget('bg'))
 
         preview_canvas = tk.Canvas(preview_window, bg=self.root.cget('bg'), highlightthickness=0)
         preview_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
@@ -244,17 +251,18 @@ class FontViewerApp:
         preview_frame_inner = tk.Frame(preview_canvas, bg=self.root.cget('bg'))
         preview_canvas.create_window((0, 0), window=preview_frame_inner, anchor=tk.NW)
 
-        # Tri des polices par ordre alphabétique
-        fonts_in_folder_sorted = sorted(fonts_in_folder)
-
-        for font_name in fonts_in_folder_sorted:
+        # Créer une étiquette pour chaque police dans le dossier
+        for font_name in fonts_in_folder:
+            text_color = self.get_text_color()  # Obtenir la couleur de texte appropriée en fonction du thème
             label = tk.Label(preview_frame_inner, text=font_name, font=(font_name, 20), bg=self.root.cget('bg'),
-                             fg=self.root.cget('fg'))
+                             fg=text_color)
             label.pack(anchor="w")
 
+        # Mettre à jour la zone de défilement
         preview_frame_inner.update_idletasks()
         preview_canvas.config(scrollregion=preview_canvas.bbox("all"))
 
+        # Ajouter la gestion de la molette de la souris pour faire défiler la liste
         def on_mouse_wheel(event):
             preview_canvas.yview_scroll(-1 * (event.delta // 120), "units")
 
