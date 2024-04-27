@@ -3,15 +3,25 @@ from tkinter import ttk, PhotoImage
 import tkinter.simpledialog
 from tkinter import font
 import json
+import sys
+import os
 
+def resource_path(relative_path):
+    """ Obtient le chemin absolu vers une ressource, nécessaire pour PyInstaller """
+    try:
+        # Si l'application est empaquetée, le chemin d'accès à la base est celui du répertoire temporaire de l'exécutable
+        base_path = sys._MEIPASS
+    except Exception:
+        # Sinon, c'est le chemin d'accès normal du répertoire de travail
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
 
 class FontViewerApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Visualiseur de Polices")
+        self.root.title("Font Manager")
         self.root.configure(bg="#F2F2F2")
         self.fonts = font.families()
-        print("Nombre total de polices récupérées :", len(self.fonts))
         self.favorite_fonts = []
         self.custom_folders = {}
 
@@ -74,8 +84,8 @@ class FontViewerApp:
         self.black_square.bind("<Button-1>", self.change_theme)
 
         # Charger les icônes pour les thèmes
-        self.icon_night = PhotoImage(file="Night.png")
-        self.icon_day = PhotoImage(file="Day.png")
+        self.icon_night = PhotoImage(file=resource_path("Night.png"))
+        self.icon_day = PhotoImage(file=resource_path("Day.png"))
 
         # Initialiser l'icône par défaut
         self.theme_icon = tk.Label(self.root, image=self.icon_night, bg="#F2F2F2")
